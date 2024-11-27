@@ -1,0 +1,77 @@
+WG_WIREGUARD_PRIVATE_KEY: 
+SHADOWSOCKS_PASSWORD: 
+
+wg-access-server:
+  image:
+    repository: ghcr.io/freifunkmuc/wg-access-server
+    tag: v0.8.4
+  config:
+    vpn:
+      # disable IPv6
+      cidrv6: 0
+    auth:
+      oidc:
+        name: "Google Auth"
+        issuer: "https://accounts.google.com"
+        clientID: "CLIENT_ID.apps.googleusercontent.com"
+        clientSecret: "CLIENT_SECRET"
+        scopes:
+          - openid
+          - email
+          - profile
+        redirectURL: "https://wireguard.TODO.beta.gouv.fr/callback"
+        emailDomains:
+          - beta.gouv.fr # this allows all emails with @beta.gouv.fr
+        claimMapping:
+          admin: email == "" || email == ""
+  wireguard:
+    externalHost: "TODO_IP"
+    service:
+      type: LoadBalancer
+      loadBalancerIP: "TODO_IP"
+  persistence:
+    enabled: true
+  certManager:
+    enabled: false
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - wireguard.TODO.beta.gouv.fr
+    tls:
+      - secretName: lets-encrypt-wireguard
+        hosts:
+          - wireguard.TODO.beta.gouv.fr
+  additionalEnv:
+    - name: WG_EXTERNAL_HOST
+      value: "external-host"
+    - name: WG_DNS_ENABLED
+      value: "false"
+    - name: WG_VPN_ALLOWED_IPS
+      value: "192.168.248.0/21"
+    - name: WG_WIREGUARD_PRIVATE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: secret-name # see templates/secret.yaml
+          key: WG_WIREGUARD_PRIVATE_KEY
+    - name: WG_LOG_LEVEL
+      value: "info"
+
+shadowsocks:
+  image:
+    repository: shadowsocks/shadowsocks-libev
+    tag: edge
+  service:
+    type: LoadBalancer
+    loadBalancerIP: ""
+    udpLoadBalancer:
+      enabled: true
+  shadowsocks:
+    dnsServers: []
+    password:
+      plainText: ""
+      existingSecret:
+        secretName: secret-name # see templates/secret.yaml
+        passwordKey: SHADOWSOCKS_PASSWORD

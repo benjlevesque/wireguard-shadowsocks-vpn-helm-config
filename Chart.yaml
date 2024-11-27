@@ -1,0 +1,19 @@
+apiVersion: v2
+name: vpn-admin
+type: application
+version: 1.0.0
+appVersion: 1.0.0
+dependencies:
+  # TODO use https://place1.github.io/wg-access-server once this is merged:
+  # https://github.com/Place1/wg-access-server/pull/158
+  - repository: https://alexandre-abrioux.github.io/wg-access-server
+    name: wg-access-server
+    version: 0.4.7
+
+  # Shadowsocks was temporarily disabled to save costs on forwarding rules
+  # TODO use https://predatorray.github.io/charts once those are merged:
+  # 1) https://github.com/predatorray/shadowsocks-helm-chart/pull/1
+  # 2) https://github.com/predatorray/shadowsocks-helm-chart/pull/2
+  #  - repository: https://alexandre-abrioux.github.io/shadowsocks-helm-chart/
+  #    name: shadowsocks
+  #    version: 0.1.3
